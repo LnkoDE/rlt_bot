@@ -7,6 +7,7 @@ from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 
 from handlers.main_handler import main_handler_router
+from handlers.action_handler import action_handler_router
 
 bot = Bot(token=os.getenv('TOKEN'))
 dp = Dispatcher()
