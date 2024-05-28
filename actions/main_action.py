@@ -25,7 +25,7 @@ query_dt_upto = datetime.datetime.strptime(dt_upto, dt_format)
 
 # Подготовка условий для запроса в БД
 condition_from = {"dt": {"$gte": query_dt_from}}
-condition_upto = {"dt": {"$lte": query_dt_from}}
+condition_upto = {"dt": {"$lte": query_dt_upto}}
 condition_group = {
     "_id": {"$dateTrunc":{"date": "$dt", "unit": "month"}}, 
     "total_value": {"$sum": "$value"}
@@ -47,10 +47,12 @@ list_aggr = list(aggr)
 dataset = []
 labels = []
 
-for data in aggr:
-    data_keys = list(data.keys())
-    data_values = list(data.values())
-    labels.append(data_keys)
-    dataset.append(data_values)
+for data in list_aggr:
+    dataprep = list(data.values())
+    dt = dataprep[0]
+    values = dataprep[1]
+    dt_str = datetime.datetime.strftime(dt, dt_format)
+    labels.append(dt_str)
+    dataset.append(values)
 answer = {"dataset": dataset, "labels": labels}
 print(answer)
