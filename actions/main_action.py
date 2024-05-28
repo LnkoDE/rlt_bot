@@ -27,7 +27,7 @@ query_dt_upto = datetime.datetime.strptime(dt_upto, dt_format)
 condition_from = {"dt": {"$gte": query_dt_from}}
 condition_upto = {"dt": {"$lte": query_dt_from}}
 condition_group = {
-    "_id": {"$month": "dt"}, 
+    "_id": {"$dateTrunc":{"date": "$dt", "unit": "month"}}, 
     "total_value": {"$sum": "$value"}
     }
 
