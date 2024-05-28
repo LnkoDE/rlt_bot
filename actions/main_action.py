@@ -30,3 +30,15 @@ condition_group = {
     "_id": {"$month": "dt"}, 
     "total_value": {"$sum": "$value"}
     }
+
+# Стадии конвейера
+match_stage = {"$match": 
+               {"$and": [condition_from, condition_upto]}
+            }
+group_stage = {"$group": condition_group}
+sort_stage = {"$sort": {"_id": 1}}
+
+# Конвейер для агрегации
+pipeline = [match_stage, group_stage, sort_stage]
+
+x = coll.aggregate(pipeline)
