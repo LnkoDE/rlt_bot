@@ -40,5 +40,17 @@ sort_stage = {"$sort": {"_id": 1}}
 
 # Конвейер для агрегации
 pipeline = [match_stage, group_stage, sort_stage]
+aggr = coll.aggregate(pipeline)
+list_aggr = list(aggr)
 
-x = coll.aggregate(pipeline)
+# Формирование ответа на запрос
+dataset = []
+labels = []
+
+for data in aggr:
+    data_keys = list(data.keys())
+    data_values = list(data.values())
+    labels.append(data_keys)
+    dataset.append(data_values)
+answer = {"dataset": dataset, "labels": labels}
+print(answer)
