@@ -22,3 +22,11 @@ group_type = "month"
 dt_format = "%Y-%m-%dT%H:%M:%S"
 query_dt_from = datetime.datetime.strptime(dt_from, dt_format)
 query_dt_upto = datetime.datetime.strptime(dt_upto, dt_format)
+
+# Подготовка условий для запроса в БД
+condition_from = {"dt": {"$gte": query_dt_from}}
+condition_upto = {"dt": {"$lte": query_dt_from}}
+condition_group = {
+    "_id": {"$month": "dt"}, 
+    "total_value": {"$sum": "$value"}
+    }
