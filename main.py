@@ -14,6 +14,7 @@ dp = Dispatcher()
 
 dp.include_routers(
     main_handler_router,
+    action_handler_router
 )
 
 async def main():
