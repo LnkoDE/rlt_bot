@@ -19,6 +19,19 @@ dt_upto = "2022-12-31T23:59:00"
 group_type = "month"
 
 def aggregatedb_bygroup(dt_from, dt_upto, group_type):
+    # Функция для выбора типа группировки
+    def return_condition_group():
+        if group_type == "hour":
+            condition_dt = {"$dateTrunc":{"date": "$dt", "unit": "hour"}}
+        elif group_type == "day":
+            condition_dt = {"$dateTrunc":{"date": "$dt", "unit": "day"}}
+        elif group_type == "month":
+            condition_dt = {"$dateTrunc":{"date": "$dt", "unit": "month"}}
+        else:
+            raise TypeError
+        condition_group = {"_id": condition_dt, "total_value": {"$sum": "$value"}}
+        return condition_group
+    
     # Переформатирование даты из запроса
     dt_format = "%Y-%m-%dT%H:%M:%S"
     query_dt_from = datetime.datetime.strptime(dt_from, dt_format)
@@ -27,10 +40,7 @@ def aggregatedb_bygroup(dt_from, dt_upto, group_type):
     # Подготовка условий для запроса в БД
     condition_from = {"dt": {"$gte": query_dt_from}}
     condition_upto = {"dt": {"$lte": query_dt_upto}}
-    condition_group = {
-        "_id": {"$dateTrunc":{"date": "$dt", "unit": "month"}}, 
-        "total_value": {"$sum": "$value"}
-        }
+    condition_group = return_condition_group()
 
     # Стадии конвейера
     match_stage = {"$match": 
