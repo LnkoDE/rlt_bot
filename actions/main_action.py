@@ -1,5 +1,6 @@
-import os, datetime
+import os, datetime, json
 
+import pandas
 from pymongo import MongoClient
 
 from dotenv import find_dotenv, load_dotenv
@@ -32,6 +33,18 @@ def aggregatedb_bygroup(dt_from, dt_upto, group_type):
         condition_group = {"_id": condition_dt, "total_value": {"$sum": "$value"}}
         return condition_group
     
+    def return_delta(count):
+        if group_type == "hour":
+            delta = pandas.offsets.DateOffset(hours=count)
+        elif group_type == "day":
+            delta = pandas.offsets.DateOffset(days=count)
+        elif group_type == "month":
+            delta = pandas.offsets.DateOffset(months=count)
+        else:
+            raise TypeError
+        return delta 
+        
+    
     # Переформатирование даты из запроса
     dt_format = "%Y-%m-%dT%H:%M:%S"
     query_dt_from = datetime.datetime.strptime(dt_from, dt_format)
@@ -57,13 +70,38 @@ def aggregatedb_bygroup(dt_from, dt_upto, group_type):
     # Формирование ответа на запрос
     dataset = []
     labels = []
-
+    count = 0
     for data in list_aggr:
         dataprep = list(data.values())
         dt = dataprep[0]
+        delta = return_delta(count)
+        dt_check = query_dt_from + delta     
+  
+        while dt_check < dt:
+            count += 1
+            values = 0
+            dt_str = datetime.datetime.strftime(dt_check, dt_format)
+            delta = return_delta(count)
+            dt_check = query_dt_from + delta
+            labels.append(dt_str)
+            dataset.append(values)
+
         values = dataprep[1]
         dt_str = datetime.datetime.strftime(dt, dt_format)
+
+        count +=1
         labels.append(dt_str)
         dataset.append(values)
+
+    if return_delta(count=1) + dt <= query_dt_upto:
+        while dt_check < query_dt_upto:
+            values = 0
+            delta = return_delta(count)
+            dt_check = query_dt_from + delta
+            dt_str = datetime.datetime.strftime(dt_check, dt_format)
+            count +=1
+            labels.append(dt_str)
+            dataset.append(values)        
+
     answer = {"dataset": dataset, "labels": labels}
-    return answer
+    return json.dumps(answer)
